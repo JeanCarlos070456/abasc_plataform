@@ -1,0 +1,38 @@
+{% load static %}
+<footer class="site-footer">
+    <div class="container footer-grid">
+        <div>
+            <img class="footer-logo"
+                 src="{% static 'img/logo-abasc.png' %}"
+                 alt="ABASC">
+            <p>{{ site_config.full_name|default:abasc_full_name }}</p>
+        </div>
+        <div>
+            <h2>Navegação</h2>
+            <a href="{% url 'news:list' %}">Notícias</a>
+            <a href="{% url 'core:about' %}">Sobre a ABASC</a>
+            <a href="{% url 'core:contact' %}">Contato</a>
+        </div>
+        <div>
+            <h2>Acesso</h2>
+            {% if user.is_authenticated %}
+                <a href="{% url 'accounts:post_login' %}">Meu painel</a>
+                <a href="{% url 'accounts:profile' %}">Meus dados</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">Área do associado</a>
+            {% endif %}
+        </div>
+        <div>
+            <h2>Contato</h2>
+            <a href="mailto:{{ site_config.contact_email|default:abasc_contact_email }}">
+                {{ site_config.contact_email|default:abasc_contact_email }}
+            </a>
+            {% if site_config.contact_phone %}
+                <span>{{ site_config.contact_phone }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container footer-bottom">
+        © {% now 'Y' %} ABASC. Plataforma institucional.
+    </div>
+</footer>

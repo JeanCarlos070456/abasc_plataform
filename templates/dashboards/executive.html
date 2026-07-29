@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Painel executivo — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Gestão operacional</span>
+                <h1>Painel executivo</h1>
+                <p>
+                    Indicadores de associados, pagamentos
+                    e comunicação institucional.
+                </p>
+            </div>
+            <a class="btn btn-primary"
+               href="{% url 'news:create' %}">
+                + Publicar conteúdo
+            </a>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span>Associados ativos</span>
+                <strong>{{ stats.active_associates }}</strong>
+                <small>Cadastros regulares</small>
+            </div>
+            <div class="stat-card">
+                <span>Com pendência</span>
+                <strong>{{ stats.overdue_associates }}</strong>
+                <small>Situação inadimplente</small>
+            </div>
+            <div class="stat-card">
+                <span>Publicações</span>
+                <strong>{{ stats.published_posts }}</strong>
+                <small>Conteúdos publicados</small>
+            </div>
+            <div class="stat-card">
+                <span>Rascunhos</span>
+                <strong>{{ stats.draft_posts }}</strong>
+                <small>Aguardando revisão</small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="panel-card">
+                <div class="panel-heading">
+                    <h2>Cobranças abertas</h2>
+                    <a href="{% url 'associates:manage_payments' %}">
+                        Ver todas
+                    </a>
+                </div>
+                <div class="simple-list">
+                    {% for payment in due_payments %}
+                        <div>
+                            <strong>
+                                {{ payment.associate.display_name }}
+                            </strong>
+                            <span>
+                                Vence em {{ payment.due_date|date:'d/m/Y' }}
+                                — R$ {{ payment.amount }}
+                            </span>
+                            <small>{{ payment.get_status_display }}</small>
+                        </div>
+                    {% empty %}
+                        <p>Nenhuma cobrança aberta.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-heading">
+                    <h2>Publicações recentes</h2>
+                    <a href="{% url 'news:manage' %}">
+                        Gerenciar
+                    </a>
+                </div>
+                <div class="simple-list">
+                    {% for post in recent_posts %}
+                        <a href="{% url 'news:update' post.pk %}">
+                            <strong>{{ post.title }}</strong>
+                            <span>{{ post.category.name }}</span>
+                            <small>{{ post.get_status_display }}</small>
+                        </a>
+                    {% empty %}
+                        <p>Nenhuma publicação.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-heading">
+                <h2>Novos associados</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Situação</th>
+                        <th>Cadastro</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for associate in recent_associates %}
+                        <tr>
+                            <td>{{ associate.display_name }}</td>
+                            <td>{{ associate.email }}</td>
+                            <td>
+                                {{ associate.get_association_status_display }}
+                            </td>
+                            <td>{{ associate.date_joined|date:'d/m/Y' }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Nenhum associado.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

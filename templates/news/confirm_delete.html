@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Excluir publicação — ABASC{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container narrow">
+        <div class="auth-card">
+            <span class="eyebrow">Ação irreversível</span>
+            <h1>Excluir publicação?</h1>
+            <p>
+                Você está prestes a excluir
+                <strong>{{ post.title }}</strong>.
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <button class="btn btn-danger" type="submit">
+                        Excluir definitivamente
+                    </button>
+                    <a class="btn btn-ghost"
+                       href="{% url 'news:manage' %}">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

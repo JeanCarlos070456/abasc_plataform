@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Portal institucional da Associação de Bacharéis em Saúde Coletiva.">
+    <meta name="theme-color" content="#04758a">
+    <title>{% block title %}ABASC{% endblock %}</title>
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    {% include 'includes/topbar.html' %}
+    {% include 'includes/header.html' %}
+
+    {% if messages %}
+        <div class="container messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main id="conteudo">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+    <script src="{% static 'js/app.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

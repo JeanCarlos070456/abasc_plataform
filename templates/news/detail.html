@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} — ABASC{% endblock %}
+{% block content %}
+<article>
+    <header class="article-header">
+        <div class="container article-header-inner">
+            <div class="card-meta">
+                <span>{{ post.category.name }}</span>
+                <time>{{ post.published_at|date:'d/m/Y H:i' }}</time>
+            </div>
+            <h1>{{ post.title }}</h1>
+            <p>{{ post.summary }}</p>
+        </div>
+    </header>
+    <div class="container article-layout">
+        <div class="article-main">
+            <img class="article-cover"
+                 src="{{ post.cover_url }}"
+                 alt="">
+            <div class="prose">
+                {{ post.body|linebreaks }}
+            </div>
+            {% if post.external_url %}
+                <a class="btn btn-primary"
+                   href="{{ post.external_url }}"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Acessar link externo ↗
+                </a>
+            {% endif %}
+        </div>
+        <aside class="article-aside">
+            <div class="info-card">
+                <span>Publicado por</span>
+                <strong>{{ post.author.display_name }}</strong>
+                <small>
+                    Visibilidade: {{ post.get_visibility_display }}
+                </small>
+            </div>
+        </aside>
+    </div>
+</article>
+
+{% if related %}
+<section class="section section-soft">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Conteúdos relacionados</h2>
+        </div>
+        <div class="news-grid">
+            {% for post in related %}
+                {% include 'includes/post_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

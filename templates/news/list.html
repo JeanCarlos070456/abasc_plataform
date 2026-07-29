@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Notícias — ABASC{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Informação institucional</span>
+        <h1>Notícias e oportunidades</h1>
+        <p>
+            Acompanhe ações, debates, eventos e oportunidades
+            divulgadas pela ABASC.
+        </p>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <form class="filter-bar" method="get">
+            <input class="form-control"
+                   type="search"
+                   name="q"
+                   value="{{ query }}"
+                   placeholder="Buscar publicação">
+            <select class="form-control" name="categoria">
+                <option value="">Todas as categorias</option>
+                {% for category in categories %}
+                    <option value="{{ category.slug }}"
+                            {% if selected_category == category.slug %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label class="filter-check">
+                <input type="checkbox"
+                       name="oportunidades"
+                       value="1"
+                       {% if opportunities_only %}checked{% endif %}>
+                Somente oportunidades
+            </label>
+            <button class="btn btn-primary" type="submit">
+                Filtrar
+            </button>
+        </form>
+
+        <div class="news-grid">
+            {% for post in page_obj %}
+                {% include 'includes/post_card.html' %}
+            {% empty %}
+                <div class="empty-state">
+                    <h3>Nenhum resultado encontrado</h3>
+                    <p>Ajuste os filtros de busca.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+            <nav class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}&categoria={{ selected_category|urlencode }}{% if opportunities_only %}&oportunidades=1{% endif %}">
+                        ← Anterior
+                    </a>
+                {% endif %}
+                <span>
+                    Página {{ page_obj.number }}
+                    de {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}&categoria={{ selected_category|urlencode }}{% if opportunities_only %}&oportunidades=1{% endif %}">
+                        Próxima →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+<aside class="dashboard-sidebar">
+    <div class="sidebar-user">
+        <div class="avatar-initial">
+            {{ user.display_name|first|upper }}
+        </div>
+        <div>
+            <strong>{{ user.display_name }}</strong>
+            <span>{{ user.get_role_display }}</span>
+        </div>
+    </div>
+
+    <nav>
+        <a href="{% url 'accounts:post_login' %}">Visão geral</a>
+        <a href="{% url 'accounts:profile' %}">Meus dados</a>
+        <a href="{% url 'associates:dashboard' %}">
+            Área do associado
+        </a>
+
+        {% if user.can_manage_content %}
+            <div class="sidebar-label">Gestão executiva</div>
+            <a href="{% url 'dashboards:executive' %}">
+                Painel executivo
+            </a>
+            <a href="{% url 'news:manage' %}">Publicações</a>
+            <a href="{% url 'news:create' %}">Nova publicação</a>
+            <a href="{% url 'news:categories' %}">Categorias</a>
+            <a href="{% url 'associates:manage_payments' %}">
+                Pagamentos
+            </a>
+        {% endif %}
+
+        {% if user.is_president %}
+            <div class="sidebar-label">Presidência</div>
+            <a href="{% url 'dashboards:president' %}">
+                Painel estratégico
+            </a>
+            <a href="{% url 'dashboards:users' %}">
+                Usuários e perfis
+            </a>
+            {% if user.is_staff %}
+                <a href="/admin/">Administração Django</a>
+            {% endif %}
+        {% endif %}
+    </nav>
+</aside>

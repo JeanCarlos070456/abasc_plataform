@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Gestão de publicações — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Conteúdo</span>
+                <h1>Publicações</h1>
+                <p>
+                    Crie, revise, publique ou arquive
+                    notícias e oportunidades.
+                </p>
+            </div>
+            <a class="btn btn-primary" href="{% url 'news:create' %}">
+                + Nova publicação
+            </a>
+        </div>
+
+        <div class="panel-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Categoria</th>
+                        <th>Status</th>
+                        <th>Visibilidade</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for post in posts %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ post.title|truncatechars:55 }}
+                                </strong>
+                                {% if post.featured %}
+                                    <span class="badge badge-info">
+                                        Destaque
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ post.category.name }}</td>
+                            <td>
+                                <span class="badge badge-{{ post.status }}">
+                                    {{ post.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ post.get_visibility_display }}</td>
+                            <td>
+                                {{ post.published_at|date:'d/m/Y'|default:'—' }}
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="{% url 'news:update' post.pk %}">
+                                        Editar
+                                    </a>
+                                    <form method="post"
+                                          action="{% url 'news:toggle_publish' post.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit">
+                                            {% if post.status == 'published' %}
+                                                Despublicar
+                                            {% else %}
+                                                Publicar
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    <a class="danger-link"
+                                       href="{% url 'news:delete' post.pk %}">
+                                        Excluir
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                Nenhuma publicação cadastrada.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

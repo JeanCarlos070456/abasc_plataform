@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Usuários e perfis — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Governança de acesso</span>
+                <h1>Usuários e perfis</h1>
+                <p>
+                    Controle papéis, situação associativa
+                    e ativação das contas.
+                </p>
+            </div>
+        </div>
+
+        <form class="filter-bar compact" method="get">
+            <input class="form-control"
+                   type="search"
+                   name="q"
+                   value="{{ query }}"
+                   placeholder="Buscar por nome ou e-mail">
+            <button class="btn btn-primary" type="submit">
+                Buscar
+            </button>
+        </form>
+
+        <div class="panel-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Perfil</th>
+                        <th>Situação</th>
+                        <th>Nº associado</th>
+                        <th>Ativo</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in users_list %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.display_name }}</strong>
+                                <small>{{ item.email }}</small>
+                            </td>
+                            <td>{{ item.get_role_display }}</td>
+                            <td>
+                                {{ item.get_association_status_display }}
+                            </td>
+                            <td>{{ item.membership_number|default:'—' }}</td>
+                            <td>
+                                {% if item.is_active %}Sim{% else %}Não{% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboards:update_user' item.pk %}">
+                                    Editar acesso
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                Nenhum usuário encontrado.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop stop-color="#04758a"/>
+      <stop offset="1" stop-color="#04bc22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="#eef8fa"/>
+  <circle cx="1010" cy="120" r="210" fill="#9fbde6" opacity=".45"/>
+  <circle cx="180" cy="590" r="260" fill="#6cbc7c" opacity=".35"/>
+  <path d="M520 145h160v120h120v160H680v120H520V425H400V265h120z"
+        fill="url(#g)"/>
+  <text x="600" y="610"
+        text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-size="54"
+        font-weight="700"
+        fill="#14383f">ABASC • NOTÍCIAS</text>
+</svg>

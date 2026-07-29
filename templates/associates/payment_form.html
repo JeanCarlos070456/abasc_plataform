@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title }} — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Financeiro</span>
+                <h1>{{ page_title }}</h1>
+            </div>
+            <a class="btn btn-ghost"
+               href="{% url 'associates:manage_payments' %}">
+                Voltar
+            </a>
+        </div>
+        <div class="panel-card">
+            <form method="post" class="form-grid">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <div class="form-actions full">
+                    <button class="btn btn-primary" type="submit">
+                        Salvar pagamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

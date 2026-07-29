@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Contato — ABASC{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Fale conosco</span>
+        <h1>Contato</h1>
+        <p>
+            Use nossos canais institucionais para dúvidas,
+            parcerias e informações.
+        </p>
+    </div>
+</section>
+<section class="section">
+    <div class="container contact-grid">
+        <div class="contact-card">
+            <span>E-mail institucional</span>
+            <a href="mailto:{{ site_config.contact_email|default:abasc_contact_email }}">
+                {{ site_config.contact_email|default:abasc_contact_email }}
+            </a>
+        </div>
+        <div class="contact-card">
+            <span>Área do associado</span>
+            <a href="{% url 'accounts:login' %}">
+                Acessar plataforma
+            </a>
+        </div>
+        <div class="contact-card">
+            <span>Notícias e oportunidades</span>
+            <a href="{% url 'news:list' %}">
+                Ver publicações
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

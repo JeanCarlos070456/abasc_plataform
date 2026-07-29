@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Erro interno — ABASC{% endblock %}
+{% block content %}
+<section class="error-page">
+    <div class="container narrow">
+        <span class="error-code">500</span>
+        <h1>Erro interno</h1>
+        <p>O sistema encontrou um erro inesperado. Tente novamente em instantes.</p>
+        <a class="btn btn-primary" href="{% url 'core:home' %}">
+            Voltar ao início
+        </a>
+    </div>
+</section>
+{% endblock %}

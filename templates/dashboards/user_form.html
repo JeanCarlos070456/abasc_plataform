@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Editar usuário — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Permissões</span>
+                <h1>{{ managed_user.display_name }}</h1>
+                <p>{{ managed_user.email }}</p>
+            </div>
+            <a class="btn btn-ghost"
+               href="{% url 'dashboards:users' %}">
+                Voltar
+            </a>
+        </div>
+
+        <div class="panel-card narrow-panel">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-primary" type="submit">
+                    Salvar permissões
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

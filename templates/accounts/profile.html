@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Meus dados — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Conta</span>
+                <h1>Meus dados</h1>
+                <p>
+                    Atualize suas informações de contato
+                    e atuação profissional.
+                </p>
+            </div>
+        </div>
+        <div class="panel-card">
+            <form method="post" class="form-grid">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <div class="form-group full">
+                    <label>E-mail</label>
+                    <input class="form-control"
+                           value="{{ user.email }}"
+                           disabled>
+                    <small>
+                        O e-mail é controlado pelo serviço de autenticação.
+                    </small>
+                </div>
+                <div class="form-actions full">
+                    <button class="btn btn-primary" type="submit">
+                        Salvar alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

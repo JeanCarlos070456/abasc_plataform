@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Painel da presidência — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Visão estratégica</span>
+                <h1>Painel da presidência</h1>
+                <p>
+                    Indicadores institucionais, financeiros
+                    e registros de governança.
+                </p>
+            </div>
+            <a class="btn btn-primary"
+               href="{% url 'dashboards:users' %}">
+                Gerenciar usuários
+            </a>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span>Usuários ativos</span>
+                <strong>{{ stats.total_users }}</strong>
+                <small>Todos os perfis</small>
+            </div>
+            <div class="stat-card">
+                <span>Executivos</span>
+                <strong>{{ stats.executives }}</strong>
+                <small>Acesso operacional</small>
+            </div>
+            <div class="stat-card">
+                <span>Total recebido</span>
+                <strong>R$ {{ stats.paid_total }}</strong>
+                <small>Pagamentos registrados</small>
+            </div>
+            <div class="stat-card">
+                <span>Valores em aberto</span>
+                <strong>R$ {{ stats.pending_total }}</strong>
+                <small>Pendentes e vencidos</small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="panel-card">
+                <h2>Situação dos associados</h2>
+                <div class="bar-chart">
+                    {% for item in status_chart %}
+                        <div class="bar-row">
+                            <div>
+                                <span>{{ item.label }}</span>
+                                <strong>{{ item.count }}</strong>
+                            </div>
+                            <div class="bar-track">
+                                <span style="width: {{ item.percent }}%"></span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-heading">
+                    <h2>Auditoria recente</h2>
+                </div>
+                <div class="timeline">
+                    {% for log in recent_logs %}
+                        <div>
+                            <span class="timeline-dot"></span>
+                            <strong>{{ log.description }}</strong>
+                            <small>
+                                {{ log.actor.display_name|default:'Sistema' }}
+                                — {{ log.created_at|date:'d/m/Y H:i' }}
+                            </small>
+                        </div>
+                    {% empty %}
+                        <p>Nenhum registro de auditoria.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

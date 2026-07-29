@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Pagamentos — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Financeiro associativo</span>
+                <h1>Pagamentos</h1>
+                <p>
+                    Cadastre e acompanhe mensalidades
+                    e situações de pagamento.
+                </p>
+            </div>
+            <a class="btn btn-primary"
+               href="{% url 'associates:create_payment' %}">
+                + Novo pagamento
+            </a>
+        </div>
+
+        <div class="panel-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Associado</th>
+                        <th>Referência</th>
+                        <th>Vencimento</th>
+                        <th>Pagamento</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ payment.associate.display_name }}
+                                </strong>
+                                <small>{{ payment.associate.email }}</small>
+                            </td>
+                            <td>{{ payment.reference_month|date:'m/Y' }}</td>
+                            <td>{{ payment.due_date|date:'d/m/Y' }}</td>
+                            <td>
+                                {{ payment.paid_at|date:'d/m/Y'|default:'—' }}
+                            </td>
+                            <td>R$ {{ payment.amount }}</td>
+                            <td>
+                                <span class="badge badge-{{ payment.status }}">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'associates:update_payment' payment.pk %}">
+                                    Editar
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                Nenhum pagamento cadastrado.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

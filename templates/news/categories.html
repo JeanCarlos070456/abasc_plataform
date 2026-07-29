@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Categorias — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Organização</span>
+                <h1>Categorias</h1>
+                <p>
+                    Organize notícias, eventos,
+                    regulamentação e oportunidades.
+                </p>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="panel-card">
+                <h2>Nova categoria</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                    <button class="btn btn-primary" type="submit">
+                        Criar categoria
+                    </button>
+                </form>
+            </div>
+            <div class="panel-card">
+                <h2>Categorias cadastradas</h2>
+                <div class="simple-list">
+                    {% for category in categories %}
+                        <div>
+                            <strong>{{ category.name }}</strong>
+                            <span>
+                                {{ category.description|default:'Sem descrição' }}
+                            </span>
+                            <small>
+                                {% if category.active %}Ativa{% else %}Inativa{% endif %}
+                            </small>
+                        </div>
+                    {% empty %}
+                        <p>Nenhuma categoria cadastrada.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

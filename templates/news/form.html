@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title }} — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Conteúdo</span>
+                <h1>{{ page_title }}</h1>
+                <p>
+                    Cadastre texto, link, imagem,
+                    visibilidade e status.
+                </p>
+            </div>
+            <a class="btn btn-ghost" href="{% url 'news:manage' %}">
+                Voltar
+            </a>
+        </div>
+
+        <div class="panel-card">
+            <form method="post"
+                  enctype="multipart/form-data"
+                  class="form-grid">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors full">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="form-group
+                        {% if field.name == 'body' or field.name == 'summary' or field.name == 'image_file' or field.name == 'image_url' %}full{% endif %}">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {{ field.errors }}
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="form-actions full">
+                    <button class="btn btn-primary" type="submit">
+                        Salvar publicação
+                    </button>
+                    <a class="btn btn-ghost"
+                       href="{% url 'news:manage' %}">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

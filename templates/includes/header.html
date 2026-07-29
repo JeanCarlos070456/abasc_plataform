@@ -1,0 +1,45 @@
+{% load static %}
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand"
+           href="{% url 'core:home' %}"
+           aria-label="Página inicial da ABASC">
+            <img src="{% static 'img/logo-abasc.png' %}"
+                 alt="ABASC — Associação de Bacharéis em Saúde Coletiva">
+        </a>
+
+        <button class="menu-toggle"
+                type="button"
+                aria-label="Abrir menu"
+                aria-expanded="false"
+                data-menu-toggle>☰</button>
+
+        <nav class="main-nav"
+             data-main-menu
+             aria-label="Navegação principal">
+            <a href="{% url 'core:home' %}">Início</a>
+            <a href="{% url 'news:list' %}">Notícias</a>
+            <a href="{% url 'news:list' %}?oportunidades=1">Oportunidades</a>
+            <a href="{% url 'core:about' %}">A ABASC</a>
+            <a href="{% url 'core:contact' %}">Contato</a>
+
+            {% if user.is_authenticated %}
+                <a class="nav-pill"
+                   href="{% url 'accounts:post_login' %}">
+                    Meu painel
+                </a>
+                <form method="post"
+                      action="{% url 'accounts:logout' %}"
+                      class="nav-form">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link-button">Sair</button>
+                </form>
+            {% else %}
+                <a class="nav-pill"
+                   href="{% url 'accounts:login' %}">
+                    Entrar
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+</header>

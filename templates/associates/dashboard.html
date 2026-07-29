@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Área do associado — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Área do associado</span>
+                <h1>Olá, {{ user.display_name }}</h1>
+                <p>
+                    Acompanhe seus dados e sua situação associativa.
+                </p>
+            </div>
+            <a class="btn btn-ghost"
+               href="{% url 'accounts:profile' %}">
+                Atualizar dados
+            </a>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span>Situação</span>
+                <strong>{{ user.get_association_status_display }}</strong>
+                <small>
+                    Nº {{ user.membership_number|default:'não informado' }}
+                </small>
+            </div>
+            <div class="stat-card">
+                <span>Último pagamento</span>
+                <strong>
+                    {% if last_payment %}
+                        {{ last_payment.paid_at|date:'d/m/Y' }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+                <small>
+                    {% if last_payment %}
+                        R$ {{ last_payment.amount }}
+                    {% else %}
+                        Sem registro
+                    {% endif %}
+                </small>
+            </div>
+            <div class="stat-card">
+                <span>Próximo vencimento</span>
+                <strong>
+                    {% if next_payment %}
+                        {{ next_payment.due_date|date:'d/m/Y' }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+                <small>
+                    {% if next_payment %}
+                        {{ next_payment.get_status_display }}
+                    {% else %}
+                        Sem cobrança aberta
+                    {% endif %}
+                </small>
+            </div>
+            <div class="stat-card">
+                <span>Perfil de acesso</span>
+                <strong>{{ user.get_role_display }}</strong>
+                <small>Conta ativa</small>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="panel-card">
+                <div class="panel-heading">
+                    <h2>Histórico de pagamentos</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Referência</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.reference_month|date:'m/Y' }}</td>
+                                <td>{{ payment.due_date|date:'d/m/Y' }}</td>
+                                <td>R$ {{ payment.amount }}</td>
+                                <td>
+                                    <span class="badge badge-{{ payment.status }}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">
+                                    Nenhum pagamento cadastrado.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-heading">
+                    <h2>Comunicados exclusivos</h2>
+                </div>
+                <div class="simple-list">
+                    {% for post in member_posts %}
+                        <a href="{{ post.get_absolute_url }}">
+                            <strong>{{ post.title }}</strong>
+                            <span>
+                                {{ post.summary|truncatechars:100 }}
+                            </span>
+                            <small>
+                                {{ post.published_at|date:'d/m/Y' }}
+                            </small>
+                        </a>
+                    {% empty %}
+                        <p>Nenhum comunicado exclusivo disponível.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
