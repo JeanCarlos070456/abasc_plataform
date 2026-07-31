@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analisar solicitação — ABASC{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/membership.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout container-wide application-detail-page">
+    {% include 'includes/dashboard_nav.html' %}
+
+    <section class="dashboard-content">
+        <div class="dashboard-header application-detail-header">
+            <div>
+                <span class="eyebrow">
+                    Solicitação #{{ application.pk }}
+                </span>
+                <h1>{{ application.full_name }}</h1>
+                <div class="application-header-meta">
+                    <span class="application-status application-status-{{ application.status }}">
+                        {{ application.get_status_display }}
+                    </span>
+                    <span>
+                        Enviada em {{ application.requested_at|date:'d/m/Y \à\s H:i' }}
+                    </span>
+                </div>
+            </div>
+
+            <a class="btn btn-ghost"
+               href="{% url 'associates:manage_applications' %}">
+                ← Voltar às solicitações
+            </a>
+        </div>
+
+        <div class="application-review-layout">
+            <div class="application-main-column">
+                <article class="panel-card application-summary-card">
+                    <header class="applicant-heading">
+                        <div class="applicant-avatar" aria-hidden="true">
+                            {{ application.full_name|first|upper }}
+                        </div>
+                        <div>
+                            <span class="detail-kicker">Candidato(a)</span>
+                            <h2>{{ application.full_name }}</h2>
+                            <p>
+                                {{ application.get_category_display }}
+                                · {{ application.get_application_type_display }}
+                            </p>
+                        </div>
+                    </header>
+
+                    <section class="info-section">
+                        <div class="info-section-heading">
+                            <h3>Dados pessoais</h3>
+                        </div>
+
+                        <dl class="info-grid">
+                            <div class="info-item info-item-wide">
+                                <dt>E-mail</dt>
+                                <dd>
+                                    <a href="mailto:{{ application.email }}">
+                                        {{ application.email }}
+                                    </a>
+                                </dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>CPF</dt>
+                                <dd>{{ application.cpf }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Data de nascimento</dt>
+                                <dd>{{ application.birth_date|date:'d/m/Y' }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Gênero</dt>
+                                <dd>{{ application.get_gender_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Cor, raça e etnia</dt>
+                                <dd>{{ application.get_race_ethnicity_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Estado civil</dt>
+                                <dd>{{ application.get_marital_status_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Possui deficiência?</dt>
+                                <dd>{{ application.get_has_disability_display }}</dd>
+                            </div>
+
+                            {% if application.disability_description %}
+                                <div class="info-item info-item-wide">
+                                    <dt>Descrição da deficiência</dt>
+                                    <dd>{{ application.disability_description }}</dd>
+                                </div>
+                            {% endif %}
+                        </dl>
+                    </section>
+
+                    <section class="info-section">
+                        <div class="info-section-heading">
+                            <h3>Contato e localização</h3>
+                        </div>
+
+                        <dl class="info-grid">
+                            <div class="info-item">
+                                <dt>WhatsApp</dt>
+                                <dd>{{ application.whatsapp }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Grupo de WhatsApp</dt>
+                                <dd>{{ application.get_allow_whatsapp_group_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Município</dt>
+                                <dd>{{ application.city }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>UF</dt>
+                                <dd>{{ application.get_state_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Instagram</dt>
+                                <dd>{{ application.instagram|default:'Não informado' }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Currículo Lattes</dt>
+                                <dd>
+                                    {% if application.lattes_url %}
+                                        <a href="{{ application.lattes_url }}"
+                                           target="_blank"
+                                           rel="noopener">
+                                            Abrir currículo
+                                        </a>
+                                    {% else %}
+                                        Não informado
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section class="info-section">
+                        <div class="info-section-heading">
+                            <h3>Formação e associação</h3>
+                        </div>
+
+                        <dl class="info-grid">
+                            <div class="info-item info-item-wide">
+                                <dt>Universidade</dt>
+                                <dd>{{ application.university }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Tipo de solicitação</dt>
+                                <dd>{{ application.get_application_type_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Categoria</dt>
+                                <dd>{{ application.get_category_display }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Valor</dt>
+                                <dd>R$ {{ application.amount|floatformat:2 }}</dd>
+                            </div>
+
+                            <div class="info-item">
+                                <dt>Pagamento via PIX</dt>
+                                <dd>
+                                    {% if application.payment_agreement %}
+                                        Confirmado
+                                    {% else %}
+                                        Não confirmado
+                                    {% endif %}
+                                </dd>
+                            </div>
+
+                            <div class="info-item info-item-wide">
+                                <dt>Vínculo com a Saúde Coletiva</dt>
+                                <dd>{{ application.health_collective_link|linebreaksbr }}</dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section class="info-section">
+                        <div class="info-section-heading">
+                            <h3>Consentimentos</h3>
+                        </div>
+
+                        <div class="consent-summary-grid">
+                            <div class="consent-summary-item">
+                                <span class="consent-check">✓</span>
+                                <span>Aceitou o estatuto da ABASC</span>
+                            </div>
+
+                            <div class="consent-summary-item">
+                                <span class="consent-check">
+                                    {% if application.consent_research %}✓{% else %}—{% endif %}
+                                </span>
+                                <span>Convites para pesquisas científicas</span>
+                            </div>
+
+                            <div class="consent-summary-item">
+                                <span class="consent-check">
+                                    {% if application.consent_communications %}✓{% else %}—{% endif %}
+                                </span>
+                                <span>Comunicações institucionais da ABASC</span>
+                            </div>
+
+                            <div class="consent-summary-item">
+                                <span class="consent-check">✓</span>
+                                <span>Declaração de veracidade confirmada</span>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+
+                <article class="panel-card documents-panel">
+                    <div class="info-section-heading">
+                        <div>
+                            <span class="detail-kicker">Arquivos privados</span>
+                            <h2>Documentação enviada</h2>
+                        </div>
+                    </div>
+
+                    <div class="document-grid">
+                        <div class="document-card">
+                            <div class="document-icon" aria-hidden="true">📄</div>
+                            <div class="document-content">
+                                <span>Documento comprobatório</span>
+                                <strong>
+                                    {{ application.supporting_document_name|default:'Arquivo enviado' }}
+                                </strong>
+                            </div>
+
+                            {% if document_url %}
+                                <a class="btn btn-ghost"
+                                   href="{{ document_url }}"
+                                   target="_blank"
+                                   rel="noopener">
+                                    Abrir arquivo
+                                </a>
+                            {% else %}
+                                <span class="document-unavailable">
+                                    Link indisponível
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="document-card">
+                            <div class="document-icon" aria-hidden="true">🧾</div>
+                            <div class="document-content">
+                                <span>Comprovante de pagamento</span>
+                                <strong>
+                                    {{ application.payment_receipt_name|default:'Arquivo enviado' }}
+                                </strong>
+                            </div>
+
+                            {% if receipt_url %}
+                                <a class="btn btn-ghost"
+                                   href="{{ receipt_url }}"
+                                   target="_blank"
+                                   rel="noopener">
+                                    Abrir arquivo
+                                </a>
+                            {% else %}
+                                <span class="document-unavailable">
+                                    Link indisponível
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <aside class="panel-card decision-card">
+                {% if application.is_pending %}
+                    <div class="decision-heading">
+                        <span class="detail-kicker">Análise da diretoria</span>
+                        <h2>Decisão</h2>
+                        <p>
+                            Confira os dados e os documentos antes de aprovar.
+                        </p>
+                    </div>
+
+                    <form method="post" class="decision-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve">
+
+                        {% if review_form.non_field_errors %}
+                            <div class="form-errors">
+                                {{ review_form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        {% for field in review_form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {{ field.errors }}
+                                {% if field.help_text %}
+                                    <small>{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <button class="btn btn-primary decision-primary-button"
+                                type="submit">
+                            Aprovar e convidar
+                        </button>
+                    </form>
+
+                    <div class="decision-divider">
+                        <span>ou</span>
+                    </div>
+
+                    <form method="post"
+                          action="{% url 'associates:reject_application' application.pk %}"
+                          onsubmit="return confirm('Rejeitar e apagar definitivamente todos os dados e arquivos desta solicitação?');">
+                        {% csrf_token %}
+                        <button class="btn btn-danger decision-danger-button"
+                                type="submit">
+                            Rejeitar e excluir dados
+                        </button>
+                    </form>
+
+                    <p class="decision-warning">
+                        A rejeição remove definitivamente os dados pessoais e os
+                        arquivos privados desta solicitação.
+                    </p>
+                {% else %}
+                    <div class="decision-heading">
+                        <span class="detail-kicker">Processo concluído</span>
+                        <h2>Solicitação aprovada</h2>
+                    </div>
+
+                    <dl class="approval-summary">
+                        <div>
+                            <dt>Usuário criado</dt>
+                            <dd>
+                                {{ application.approved_user.email|default:'—' }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Analisada por</dt>
+                            <dd>
+                                {{ application.reviewed_by.display_name|default:'—' }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Data da análise</dt>
+                            <dd>
+                                {{ application.reviewed_at|date:'d/m/Y H:i'|default:'—' }}
+                            </dd>
+                        </div>
+                    </dl>
+
+                    {% if application.decision_notes %}
+                        <div class="decision-notes">
+                            <strong>Observações</strong>
+                            <p>{{ application.decision_notes|linebreaksbr }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if application.approved_user %}
+                        <div class="access-resend-panel">
+                            <strong>Acesso do associado</strong>
+                            <p>
+                                Use esta opção quando o convite tiver expirado,
+                                já tiver sido utilizado ou o associado ainda não
+                                tiver criado sua senha.
+                            </p>
+
+                            <form method="post"
+                                  action="{% url 'associates:resend_application_access' application.pk %}"
+                                  onsubmit="return confirm('Enviar um novo link de criação de senha para {{ application.approved_user.email|escapejs }}?');">
+                                {% csrf_token %}
+                                <button class="btn btn-primary decision-primary-button"
+                                        type="submit">
+                                    Reenviar link para criar senha
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </aside>
+        </div>
+    </section>
+</div>
+{% endblock %}

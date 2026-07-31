@@ -1,8 +1,18 @@
 <aside class="dashboard-sidebar">
     <div class="sidebar-user">
-        <div class="avatar-initial">
-            {{ user.display_name|first|upper }}
-        </div>
+        {% with avatar_src=user.display_avatar_url %}
+            <div class="avatar-initial">
+                {% if avatar_src %}
+                    <img src="{{ avatar_src }}"
+                         alt=""
+                         aria-hidden="true"
+                         style="display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                {% else %}
+                    {{ user.display_name|first|upper }}
+                {% endif %}
+            </div>
+        {% endwith %}
+
         <div>
             <strong>{{ user.display_name }}</strong>
             <span>{{ user.get_role_display }}</span>
@@ -26,6 +36,12 @@
             <a href="{% url 'news:categories' %}">Categorias</a>
             <a href="{% url 'associates:manage_payments' %}">
                 Pagamentos
+            </a>
+            <a href="{% url 'associates:manage_applications' %}">
+                Solicitações de associação
+            </a>
+            <a href="{% url 'associates:manage_members' %}">
+                Gestão de membros
             </a>
         {% endif %}
 

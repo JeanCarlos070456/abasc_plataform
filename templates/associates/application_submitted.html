@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Solicitação enviada — ABASC{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container narrow">
+        <div class="auth-card">
+            <span class="eyebrow">Solicitação recebida</span>
+            <h1>Obrigado, {{ application.full_name }}!</h1>
+            <p>Sua solicitação de associação foi registrada sob o número <strong>#{{ application.pk }}</strong>.</p>
+            <p>A diretoria analisará os dados e o comprovante. O convite de acesso será enviado para <strong>{{ application.email }}</strong> após a aprovação.</p>
+            <a class="btn btn-primary" href="/">Voltar à página inicial</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

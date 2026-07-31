@@ -1,0 +1,132 @@
+.profile-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, .75fr) minmax(0, 1.8fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.profile-avatar-card {
+    position: sticky;
+    top: 1.25rem;
+    text-align: center;
+}
+
+.profile-avatar-preview {
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 132px;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+    border: 5px solid #e9f5f7;
+    border-radius: 50%;
+    color: #fff;
+    background: linear-gradient(135deg, #04BC22, #04758A);
+    box-shadow: 0 14px 28px rgba(4, 117, 138, .18);
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+.profile-avatar-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar-heading h2,
+.profile-data-card h2 {
+    margin: 0;
+    color: #073b44;
+}
+
+.profile-avatar-heading p {
+    margin: .5rem 0 1.25rem;
+    color: #60757b;
+    line-height: 1.55;
+}
+
+.avatar-form {
+    display: grid;
+    gap: 1rem;
+    text-align: left;
+}
+
+.avatar-form .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.avatar-remove-option {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .85rem;
+    border: 1px solid #e2e9eb;
+    border-radius: 12px;
+    background: #f8fbfc;
+    cursor: pointer;
+}
+
+.avatar-remove-option input {
+    margin-top: .2rem;
+}
+
+.avatar-locked-message {
+    padding: 1rem;
+    border: 1px solid #f0d984;
+    border-radius: 12px;
+    color: #745600;
+    background: #fff8dc;
+    text-align: left;
+}
+
+.avatar-locked-message p {
+    margin: .4rem 0 0;
+    line-height: 1.5;
+}
+
+.profile-data-card {
+    min-width: 0;
+}
+
+.profile-section-heading {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2ecee;
+}
+
+.profile-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    min-height: 46px;
+    padding: .7rem .85rem;
+    border: 1px solid #dce8ea;
+    border-radius: 10px;
+    background: #f8fbfc;
+}
+
+.profile-status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    color: #087123;
+    background: #e8f8ec;
+    border: 1px solid #bce7c6;
+    font-size: .8rem;
+    font-weight: 900;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar-card {
+        position: static;
+    }
+}

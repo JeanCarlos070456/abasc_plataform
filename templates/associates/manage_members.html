@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Gestão de membros — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div><span class="eyebrow">Gestão de associados</span><h1>Membros cadastrados</h1><p>Atualize as funções e permissões dos membros ativos.</p></div>
+            <a class="btn btn-ghost" href="{% url 'associates:manage_applications' %}">Solicitações</a>
+        </div>
+        <div class="panel-card"><div class="table-responsive"><table>
+            <thead><tr><th>Membro</th><th>Matrícula</th><th>Função</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for member in members %}
+                <tr>
+                    <td><strong>{{ member.display_name }}</strong><br><small>{{ member.email }}</small></td>
+                    <td>{{ member.membership_number|default:'—' }}</td>
+                    <td>{{ member.get_role_display }}</td>
+                    <td>{{ member.get_association_status_display }}</td>
+                    <td><a href="{% url 'associates:update_member_role' member.pk %}">Alterar função</a></td>
+                </tr>
+            {% empty %}<tr><td colspan="5">Nenhum membro cadastrado.</td></tr>{% endfor %}
+            </tbody>
+        </table></div></div>
+    </section>
+</div>
+{% endblock %}

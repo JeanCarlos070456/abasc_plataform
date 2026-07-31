@@ -1,46 +1,163 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Meus dados — ABASC{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-layout container-wide">
     {% include 'includes/dashboard_nav.html' %}
+
     <section class="dashboard-content">
         <div class="dashboard-header">
             <div>
                 <span class="eyebrow">Conta</span>
                 <h1>Meus dados</h1>
                 <p>
-                    Atualize suas informações de contato
-                    e atuação profissional.
+                    Atualize suas informações, sua atuação profissional
+                    e sua foto de perfil.
                 </p>
             </div>
         </div>
-        <div class="panel-card">
-            <form method="post" class="form-grid">
-                {% csrf_token %}
-                {% for field in form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {{ field.errors }}
+
+        <div class="profile-layout">
+            <aside class="panel-card profile-avatar-card">
+                <div class="profile-avatar-preview">
+                    {% with avatar_src=user.display_avatar_url %}
+                        {% if avatar_src %}
+                            <img src="{{ avatar_src }}"
+                                 alt="Foto de perfil de {{ user.display_name }}">
+                        {% else %}
+                            <span aria-hidden="true">
+                                {{ user.display_name|first|upper }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="profile-avatar-heading">
+                    <h2>Foto de perfil</h2>
+                    <p>
+                        A foto aparece nos painéis internos da plataforma.
+                    </p>
+                </div>
+
+                {% if can_update_avatar %}
+                    <form method="post"
+                          enctype="multipart/form-data"
+                          class="avatar-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="avatar">
+
+                        {% if avatar_form.non_field_errors %}
+                            <div class="form-errors">
+                                {{ avatar_form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ avatar_form.avatar.id_for_label }}">
+                                {{ avatar_form.avatar.label }}
+                            </label>
+                            {{ avatar_form.avatar }}
+                            {{ avatar_form.avatar.errors }}
+                            {% if avatar_form.avatar.help_text %}
+                                <small>
+                                    {{ avatar_form.avatar.help_text }}
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        {% if user.avatar_path or user.avatar_url %}
+                            <label class="avatar-remove-option"
+                                   for="{{ avatar_form.remove_avatar.id_for_label }}">
+                                {{ avatar_form.remove_avatar }}
+                                <span>
+                                    {{ avatar_form.remove_avatar.label }}
+                                </span>
+                            </label>
+                            {{ avatar_form.remove_avatar.errors }}
+                        {% endif %}
+
+                        <button class="btn btn-primary"
+                                type="submit">
+                            Atualizar foto
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="avatar-locked-message">
+                        <strong>Foto ainda indisponível</strong>
+                        <p>
+                            Esta opção será liberada quando sua associação
+                            estiver aprovada e ativa.
+                        </p>
                     </div>
-                {% endfor %}
-                <div class="form-group full">
-                    <label>E-mail</label>
-                    <input class="form-control"
-                           value="{{ user.email }}"
-                           disabled>
-                    <small>
-                        O e-mail é controlado pelo serviço de autenticação.
-                    </small>
+                {% endif %}
+            </aside>
+
+            <div class="panel-card profile-data-card">
+                <div class="profile-section-heading">
+                    <div>
+                        <span class="eyebrow">Cadastro</span>
+                        <h2>Informações pessoais</h2>
+                    </div>
                 </div>
-                <div class="form-actions full">
-                    <button class="btn btn-primary" type="submit">
-                        Salvar alterações
-                    </button>
-                </div>
-            </form>
+
+                <form method="post" class="form-grid">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="profile">
+
+                    {% if form.non_field_errors %}
+                        <div class="form-errors full">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-group full">
+                        <label>E-mail</label>
+                        <input class="form-control"
+                               value="{{ user.email }}"
+                               disabled>
+                        <small>
+                            O e-mail é controlado pelo serviço de autenticação.
+                        </small>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Situação associativa</label>
+                        <div class="profile-status-row">
+                            <span class="profile-status-badge">
+                                {{ user.get_association_status_display }}
+                            </span>
+                            {% if user.membership_number %}
+                                <span>
+                                    Matrícula {{ user.membership_number }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions full">
+                        <button class="btn btn-primary" type="submit">
+                            Salvar alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
 </div>

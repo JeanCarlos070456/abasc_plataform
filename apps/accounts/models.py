@@ -1,5 +1,13 @@
+import logging
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.functional import cached_property
+
+
+logger = logging.getLogger(__name__)
+
 
 class User(AbstractUser):
     class Role(models.TextChoices):
@@ -49,7 +57,17 @@ class User(AbstractUser):
         null=True,
         blank=True,
     )
-    avatar_url = models.URLField('avatar', blank=True)
+
+    # Mantido para compatibilidade com perfis antigos que usavam URL pública.
+    avatar_url = models.URLField('avatar legado', blank=True)
+
+    # Caminho interno no bucket privado abasc-avatars.
+    avatar_path = models.CharField(
+        'caminho do avatar',
+        max_length=500,
+        blank=True,
+    )
+
     profile_updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -99,3 +117,34 @@ class User(AbstractUser):
     @property
     def is_president(self):
         return self.is_superuser or self.role == self.Role.PRESIDENT
+
+    @property
+    def can_update_avatar(self):
+        return (
+            self.is_active
+            and self.association_status == self.AssociationStatus.ACTIVE
+        )
+
+    @cached_property
+    def display_avatar_url(self):
+        """
+        Retorna uma URL temporária para o avatar privado.
+
+        Perfis antigos que ainda possuam avatar_url continuam funcionando.
+        """
+        if not self.avatar_path:
+            return self.avatar_url
+
+        try:
+            from apps.core.storage import create_avatar_signed_url
+
+            return create_avatar_signed_url(
+                self.avatar_path,
+                expires_in=3600,
+            )
+        except Exception:
+            logger.exception(
+                'Não foi possível gerar a URL do avatar do usuário %s.',
+                self.pk,
+            )
+            return self.avatar_url

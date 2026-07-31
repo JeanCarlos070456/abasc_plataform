@@ -35,6 +35,10 @@
                     <button type="submit" class="nav-link-button">Sair</button>
                 </form>
             {% else %}
+                <a class="nav-pill nav-pill-associate"
+                   href="{% url 'associates:join' %}">
+                    Me associar
+                </a>
                 <a class="nav-pill"
                    href="{% url 'accounts:login' %}">
                     Entrar

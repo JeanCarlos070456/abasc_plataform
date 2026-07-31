@@ -1,0 +1,6 @@
+<div class="consent-field{% if full %} full{% endif %}">
+    {{ field }}
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+    {{ field.errors }}
+    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+</div>

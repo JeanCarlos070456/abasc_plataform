@@ -163,3 +163,40 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+# Cole estas configurações no final de config/settings.py.
+# O arquivo já deve importar os.getenv ou import os.
+
+SUPABASE_STORAGE_BUCKET_ASSOCIATIONS = os.getenv(
+    "SUPABASE_STORAGE_BUCKET_ASSOCIATIONS",
+    "abasc-associations",
+)
+
+ABASC_PIX_KEY = os.getenv(
+    "ABASC_PIX_KEY",
+    "35.848.139/0001-74",
+)
+
+ABASC_PIX_NAME = os.getenv(
+    "ABASC_PIX_NAME",
+    "Associação de Bacharéis em Saúde Coletiva",
+)
+
+ABASC_CONTACT_EMAIL = os.getenv(
+    "ABASC_CONTACT_EMAIL",
+    "diretoria@abascsaudecoletiva.com",
+)
+
+ABASC_CONTACT_PHONE = os.getenv(
+    "ABASC_CONTACT_PHONE",
+    "(61) 98158-3258",
+)
+
+ABASC_SITE_URL = os.getenv(
+    "ABASC_SITE_URL",
+    "http://127.0.0.1:8000",
+)
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    "diretoria@abascsaudecoletiva.com",
+)

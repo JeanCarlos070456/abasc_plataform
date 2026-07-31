@@ -171,17 +171,52 @@ button { cursor: pointer; }
 .alert-warning { border-color: var(--warning); }
 
 .hero {
+    position: relative;
+    isolation: isolate;
     overflow: hidden;
-    background: linear-gradient(135deg, #f7fffa 0%, #eefafd 100%);
-    padding: 82px 0 76px;
+    min-height: 620px;
+    padding: 92px 0 116px;
     border-bottom: 1px solid var(--border);
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, .99) 0%,
+            rgba(255, 255, 255, .96) 34%,
+            rgba(255, 255, 255, .78) 52%,
+            rgba(255, 255, 255, .18) 100%
+        ),
+        url("../img/fundo.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center right;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    z-index: -1;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(4, 117, 138, .20),
+        transparent
+    );
 }
 
 .hero-grid {
     display: grid;
-    grid-template-columns: 1.08fr .92fr;
+    grid-template-columns: minmax(0, 700px) 1fr;
     align-items: center;
-    gap: 72px;
+    gap: 54px;
+}
+
+.hero-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
 }
 
 .hero-copy h1 {
@@ -189,7 +224,8 @@ button { cursor: pointer; }
     line-height: 1.04;
     letter-spacing: -.045em;
     margin: 14px 0 22px;
-    max-width: 850px;
+    max-width: 780px;
+    text-wrap: balance;
 }
 
 .hero-copy p {
@@ -256,8 +292,7 @@ button { cursor: pointer; }
 .btn-block { width: 100%; }
 
 .hero-visual {
-    position: relative;
-    min-height: 410px;
+    display: none;
 }
 
 .hero-symbol {
@@ -668,12 +703,15 @@ textarea.form-control {
 }
 
 .article-cover {
+    display: block;
     width: 100%;
-    aspect-ratio: 16 / 8.5;
-    object-fit: cover;
-    border-radius: var(--radius);
-    margin-bottom: 34px;
-    background: #eef7f8;
+    height: auto;
+    max-width: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 16px;
 }
 
 .article-aside {
@@ -1145,7 +1183,17 @@ td a {
 
 @media (max-width: 1080px) {
     .main-nav { gap: 16px; }
-    .hero-grid { gap: 30px; }
+
+    .hero {
+        min-height: 570px;
+        padding: 78px 0 104px;
+        background-position: 62% center;
+    }
+
+    .hero-grid {
+        grid-template-columns: minmax(0, 620px) 1fr;
+        gap: 30px;
+    }
     .news-grid { grid-template-columns: repeat(2, 1fr); }
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .dashboard-layout {
@@ -1182,14 +1230,26 @@ td a {
         width: 100%;
     }
 
+    .hero {
+        min-height: 540px;
+        padding: 70px 0 96px;
+        background-position: 70% center;
+        background-image:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, .99) 0%,
+                rgba(255, 255, 255, .95) 48%,
+                rgba(255, 255, 255, .58) 100%
+            ),
+            url("../img/fundo.png");
+    }
+
     .hero-grid,
     .auth-grid,
     .content-grid,
     .article-layout {
         grid-template-columns: 1fr;
     }
-
-    .hero-visual { min-height: 330px; }
 
     .quick-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1239,9 +1299,30 @@ td a {
     }
 
     .main-nav { top: 76px; }
-    .hero { padding: 54px 0 70px; }
-    .hero-copy h1 { font-size: 2.55rem; }
-    .hero-visual { display: none; }
+
+    .hero {
+        min-height: auto;
+        padding: 56px 0 82px;
+        background-position: 76% center;
+        background-size: auto 100%;
+        background-image:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, .99) 0%,
+                rgba(255, 255, 255, .97) 62%,
+                rgba(255, 255, 255, .74) 100%
+            ),
+            url("../img/fundo.png");
+    }
+
+    .hero-copy h1 {
+        font-size: 2.55rem;
+        text-wrap: pretty;
+    }
+
+    .hero-copy p {
+        font-size: 1rem;
+    }
 
     .quick-grid,
     .news-grid,

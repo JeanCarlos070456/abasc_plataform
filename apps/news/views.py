@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import (
@@ -10,162 +11,258 @@ from django.views.decorators.http import (
 from apps.accounts.decorators import executive_required
 from apps.core.models import AuditLog
 from apps.core.services import log_action
+from apps.core.storage import delete_public_image
+
 from .forms import CategoryForm, PostForm
 from .models import Category, Post
 from .services import StorageUploadError, upload_news_image
+
 
 def post_list(request):
     posts = Post.objects.visible_to(request.user)
     category_slug = request.GET.get('categoria', '').strip()
     query = request.GET.get('q', '').strip()
-    opportunities_only = (
-        request.GET.get('oportunidades') == '1'
-    )
+    opportunities_only = request.GET.get('oportunidades') == '1'
 
     if category_slug:
         posts = posts.filter(category__slug=category_slug)
+
     if query:
         posts = posts.filter(
             Q(title__icontains=query)
             | Q(summary__icontains=query)
             | Q(body__icontains=query)
         )
+
     if opportunities_only:
         posts = posts.filter(is_opportunity=True)
 
     page = Paginator(posts, 9).get_page(request.GET.get('page'))
-    return render(request, 'news/list.html', {
-        'page_obj': page,
-        'categories': Category.objects.filter(active=True),
-        'selected_category': category_slug,
-        'query': query,
-        'opportunities_only': opportunities_only,
-    })
+
+    return render(
+        request,
+        'news/list.html',
+        {
+            'page_obj': page,
+            'categories': Category.objects.filter(active=True),
+            'selected_category': category_slug,
+            'query': query,
+            'opportunities_only': opportunities_only,
+        },
+    )
+
 
 def post_detail(request, slug):
     post = get_object_or_404(
         Post.objects.visible_to(request.user),
         slug=slug,
     )
-    related = Post.objects.visible_to(request.user).filter(
-        category=post.category
-    ).exclude(pk=post.pk)[:3]
+
+    related = (
+        Post.objects.visible_to(request.user)
+        .filter(category=post.category)
+        .exclude(pk=post.pk)[:3]
+    )
+
     return render(
         request,
         'news/detail.html',
-        {'post': post, 'related': related},
+        {
+            'post': post,
+            'related': related,
+        },
     )
+
 
 @executive_required
 def manage_posts(request):
     posts = Post.objects.select_related('category', 'author').all()
     status = request.GET.get('status')
+
     if status in dict(Post.Status.choices):
         posts = posts.filter(status=status)
-    return render(request, 'news/manage_list.html', {
-        'posts': posts,
-        'selected_status': status,
-    })
+
+    return render(
+        request,
+        'news/manage_list.html',
+        {
+            'posts': posts,
+            'selected_status': status,
+        },
+    )
+
 
 @executive_required
 @require_http_methods(['GET', 'POST'])
 def create_post(request):
     form = PostForm(request.POST or None, request.FILES or None)
+
     if request.method == 'POST' and form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
         image = form.cleaned_data.get('image_file')
+        uploaded_image_url = ''
+
         if image:
             try:
-                post.image_url = upload_news_image(image, request)
+                uploaded_image_url = upload_news_image(image, request)
+                post.image_url = uploaded_image_url
             except StorageUploadError as exc:
                 form.add_error('image_file', str(exc))
-                return render(request, 'news/form.html', {
-                    'form': form,
-                    'page_title': 'Nova publicação',
-                })
-        post.save()
-        log_action(
-            request,
-            AuditLog.Action.CREATE,
-            f'Publicação criada: {post.title}',
-            'Post',
-            post.pk,
-        )
+                return render(
+                    request,
+                    'news/form.html',
+                    {
+                        'form': form,
+                        'page_title': 'Nova publicação',
+                    },
+                )
+
+        try:
+            with transaction.atomic():
+                post.save()
+
+                log_action(
+                    request,
+                    AuditLog.Action.CREATE,
+                    f'Publicação criada: {post.title}',
+                    'Post',
+                    post.pk,
+                )
+        except Exception:
+            # Se o banco falhar depois do upload, evita arquivo órfão.
+            if uploaded_image_url:
+                delete_public_image(uploaded_image_url)
+            raise
+
         messages.success(request, 'Publicação criada com sucesso.')
         return redirect('news:manage')
-    return render(request, 'news/form.html', {
-        'form': form,
-        'page_title': 'Nova publicação',
-    })
+
+    return render(
+        request,
+        'news/form.html',
+        {
+            'form': form,
+            'page_title': 'Nova publicação',
+        },
+    )
+
 
 @executive_required
 @require_http_methods(['GET', 'POST'])
 def update_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
+    old_image_url = post.image_url
+
     form = PostForm(
         request.POST or None,
         request.FILES or None,
         instance=post,
     )
+
     if request.method == 'POST' and form.is_valid():
         post = form.save(commit=False)
         image = form.cleaned_data.get('image_file')
+        uploaded_image_url = ''
+
         if image:
             try:
-                post.image_url = upload_news_image(image, request)
+                uploaded_image_url = upload_news_image(image, request)
+                post.image_url = uploaded_image_url
             except StorageUploadError as exc:
                 form.add_error('image_file', str(exc))
-                return render(request, 'news/form.html', {
-                    'form': form,
-                    'post': post,
-                    'page_title': 'Editar publicação',
-                })
-        post.save()
-        log_action(
-            request,
-            AuditLog.Action.UPDATE,
-            f'Publicação atualizada: {post.title}',
-            'Post',
-            post.pk,
-        )
+                return render(
+                    request,
+                    'news/form.html',
+                    {
+                        'form': form,
+                        'post': post,
+                        'page_title': 'Editar publicação',
+                    },
+                )
+
+        try:
+            with transaction.atomic():
+                post.save()
+
+                log_action(
+                    request,
+                    AuditLog.Action.UPDATE,
+                    f'Publicação atualizada: {post.title}',
+                    'Post',
+                    post.pk,
+                )
+
+                # Remove a imagem anterior somente após o commit do banco.
+                if old_image_url and old_image_url != post.image_url:
+                    transaction.on_commit(
+                        lambda url=old_image_url: delete_public_image(url)
+                    )
+        except Exception:
+            # Se o banco falhar, remove apenas a imagem recém-enviada.
+            if uploaded_image_url:
+                delete_public_image(uploaded_image_url)
+            raise
+
         messages.success(request, 'Publicação atualizada.')
         return redirect('news:manage')
-    return render(request, 'news/form.html', {
-        'form': form,
-        'post': post,
-        'page_title': 'Editar publicação',
-    })
+
+    return render(
+        request,
+        'news/form.html',
+        {
+            'form': form,
+            'post': post,
+            'page_title': 'Editar publicação',
+        },
+    )
+
 
 @executive_required
 @require_http_methods(['GET', 'POST'])
 def delete_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
+
     if request.method == 'POST':
         title = post.title
         object_id = post.pk
-        post.delete()
-        log_action(
-            request,
-            AuditLog.Action.DELETE,
-            f'Publicação excluída: {title}',
-            'Post',
-            object_id,
-        )
+        image_url = post.image_url
+
+        with transaction.atomic():
+            post.delete()
+
+            log_action(
+                request,
+                AuditLog.Action.DELETE,
+                f'Publicação excluída: {title}',
+                'Post',
+                object_id,
+            )
+
+            # O arquivo só é removido se a exclusão no banco for confirmada.
+            if image_url:
+                transaction.on_commit(
+                    lambda url=image_url: delete_public_image(url)
+                )
+
         messages.success(request, 'Publicação excluída.')
         return redirect('news:manage')
+
     return render(
         request,
         'news/confirm_delete.html',
         {'post': post},
     )
 
+
 @executive_required
 @require_http_methods(['GET', 'POST'])
 def categories(request):
     form = CategoryForm(request.POST or None)
+
     if request.method == 'POST' and form.is_valid():
         category = form.save()
+
         log_action(
             request,
             AuditLog.Action.CREATE,
@@ -173,12 +270,19 @@ def categories(request):
             'Category',
             category.pk,
         )
+
         messages.success(request, 'Categoria criada.')
         return redirect('news:categories')
-    return render(request, 'news/categories.html', {
-        'form': form,
-        'categories': Category.objects.all(),
-    })
+
+    return render(
+        request,
+        'news/categories.html',
+        {
+            'form': form,
+            'categories': Category.objects.all(),
+        },
+    )
+
 
 @executive_required
 @require_POST
@@ -190,6 +294,7 @@ def toggle_publish(request, pk):
         else Post.Status.PUBLISHED
     )
     post.save()
+
     log_action(
         request,
         AuditLog.Action.UPDATE,
@@ -197,8 +302,10 @@ def toggle_publish(request, pk):
         'Post',
         post.pk,
     )
+
     messages.success(
         request,
         f'Publicação marcada como {post.get_status_display().lower()}.',
     )
+
     return redirect('news:manage')

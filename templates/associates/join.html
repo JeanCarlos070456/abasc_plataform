@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Me associar — ABASC{% endblock %}
+{% block content %}
+<section class="membership-hero">
+    <div class="container">
+        <span class="eyebrow">Faça parte da ABASC</span>
+        <h1>Formulário de Associação à ABASC</h1>
+        <p>Bora fortalecer a Saúde Coletiva? Bem-vinda(o) à ABASC!</p>
+    </div>
+</section>
+
+<section class="section membership-section">
+    <div class="container membership-container">
+        <div class="membership-intro panel-card">
+            <h2>Juntos, somos a força da Saúde Coletiva</h2>
+            <p>Ao se associar à ABASC, você se junta a um movimento nacional, voluntário e dedicado à regulamentação, ao reconhecimento e ao fortalecimento da profissão.</p>
+            <div class="benefit-grid">
+                <div><strong>🗳️ Voz e voto</strong><span>Participe das decisões em Assembleia Geral.</span></div>
+                <div><strong>🤝 Representatividade</strong><span>Apoio técnico, jurídico e participação nas instâncias diretivas.</span></div>
+                <div><strong>📚 Conhecimento</strong><span>Acesso a conteúdos e curso anual exclusivo.</span></div>
+                <div><strong>🎟️ Eventos</strong><span>Benefícios e participação nas atividades da ABASC.</span></div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="membership-form" class="panel-card membership-form" novalidate>
+            {% csrf_token %}
+            {{ form.website }}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="membership-steps" aria-label="Etapas do formulário">
+                <button type="button" class="step-button active" data-step-target="1"><span>1</span>Consentimentos</button>
+                <button type="button" class="step-button" data-step-target="2"><span>2</span>Dados pessoais</button>
+                <button type="button" class="step-button" data-step-target="3"><span>3</span>Formação</button>
+                <button type="button" class="step-button" data-step-target="4"><span>4</span>Contato</button>
+                <button type="button" class="step-button" data-step-target="5"><span>5</span>Pagamento</button>
+                <button type="button" class="step-button" data-step-target="6"><span>6</span>Revisão</button>
+            </div>
+
+            <section class="form-step active" data-step="1">
+                <h2>Privacidade, estatuto e consentimentos</h2>
+                <div class="privacy-box">
+                    <p><strong>Levamos sua privacidade a sério.</strong> Os dados serão usados para efetivar a associação, produzir estatísticas anonimizadas e, somente com novo consentimento, apoiar pesquisas aprovadas por Comitê de Ética.</p>
+                </div>
+                {% include 'associates/partials/checkbox_field.html' with field=form.consent_statute %}
+                {% include 'associates/partials/checkbox_field.html' with field=form.consent_research %}
+                {% include 'associates/partials/checkbox_field.html' with field=form.consent_communications %}
+            </section>
+
+            <section class="form-step" data-step="2">
+                <h2>Dados pessoais</h2>
+                <div class="form-grid">
+                    {% include 'associates/partials/field.html' with field=form.full_name full=True %}
+                    {% include 'associates/partials/field.html' with field=form.email %}
+                    {% include 'associates/partials/field.html' with field=form.cpf %}
+                    {% include 'associates/partials/field.html' with field=form.birth_date %}
+                    {% include 'associates/partials/field.html' with field=form.marital_status %}
+                    {% include 'associates/partials/field.html' with field=form.gender full=True %}
+                    {% include 'associates/partials/field.html' with field=form.race_ethnicity full=True %}
+                    {% include 'associates/partials/field.html' with field=form.has_disability full=True %}
+                    {% include 'associates/partials/field.html' with field=form.disability_description full=True %}
+                </div>
+            </section>
+
+            <section class="form-step" data-step="3">
+                <h2>Formação e vínculo com a Saúde Coletiva</h2>
+                <div class="form-grid">
+                    {% include 'associates/partials/field.html' with field=form.university full=True %}
+                    {% include 'associates/partials/field.html' with field=form.health_collective_link full=True %}
+                    {% include 'associates/partials/field.html' with field=form.application_type full=True %}
+                    {% include 'associates/partials/field.html' with field=form.category full=True %}
+                    {% include 'associates/partials/field.html' with field=form.supporting_document full=True %}
+                </div>
+            </section>
+
+            <section class="form-step" data-step="4">
+                <h2>Localização e contato</h2>
+                <div class="form-grid">
+                    {% include 'associates/partials/field.html' with field=form.state %}
+                    {% include 'associates/partials/field.html' with field=form.city %}
+                    {% include 'associates/partials/field.html' with field=form.whatsapp %}
+                    {% include 'associates/partials/field.html' with field=form.instagram %}
+                    {% include 'associates/partials/field.html' with field=form.lattes_url full=True %}
+                    {% include 'associates/partials/field.html' with field=form.allow_whatsapp_group full=True %}
+                </div>
+            </section>
+
+            <section class="form-step" data-step="5">
+                <h2>Pagamento da anuidade</h2>
+                <div class="payment-layout">
+                    <div class="pix-card">
+                        <span class="eyebrow">Pagamento via PIX</span>
+                        <h3>{{ pix_name }}</h3>
+                        <p><strong>Chave PIX (CNPJ):</strong> <span class="copy-value">{{ pix_key }}</span></p>
+                        <div class="price-grid">
+                            <div><span>Associado Pleno</span><strong>R$ 100,00</strong></div>
+                            <div><span>Associado Júnior</span><strong>R$ 50,00</strong></div>
+                        </div>
+                    </div>
+                    <div class="qr-card">
+                        <img src="{% static 'img/pix-qrcode-placeholder.svg' %}" alt="Espaço reservado para o QR Code PIX da ABASC">
+                        <small>Substitua este arquivo pelo QR Code PIX oficial.</small>
+                    </div>
+                </div>
+                {% include 'associates/partials/checkbox_field.html' with field=form.payment_agreement %}
+                {% include 'associates/partials/field.html' with field=form.payment_receipt full=True %}
+            </section>
+
+            <section class="form-step" data-step="6">
+                <h2>Revisão e declaração final</h2>
+                <div class="truth-box">
+                    <p>Declaro que as informações fornecidas são verdadeiras e correspondem à minha realidade. Estou ciente das consequências legais relacionadas à falsificação documental e à falsidade ideológica, bem como do direito da ABASC de verificar a autenticidade dos dados.</p>
+                </div>
+                {% include 'associates/partials/checkbox_field.html' with field=form.truth_declaration %}
+                <div class="contact-box">
+                    <strong>Ficou com alguma dúvida?</strong>
+                    <span>{{ contact_email }} · {{ contact_phone }}</span>
+                </div>
+            </section>
+
+            <div class="membership-actions">
+                <button type="button" class="btn btn-ghost" id="previous-step" hidden>← Voltar</button>
+                <button type="button" class="btn btn-primary" id="next-step">Continuar →</button>
+                <button type="submit" class="btn btn-primary" id="submit-membership" hidden>Enviar solicitação</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<link rel="stylesheet" href="{% static 'css/membership.css' %}">
+<script>
+(() => {
+    const form = document.getElementById('membership-form');
+    const panels = [...form.querySelectorAll('.form-step')];
+    const buttons = [...form.querySelectorAll('.step-button')];
+    const previous = document.getElementById('previous-step');
+    const next = document.getElementById('next-step');
+    const submit = document.getElementById('submit-membership');
+    let current = 1;
+
+    function showStep(step) {
+        current = Math.max(1, Math.min(step, panels.length));
+        panels.forEach(panel => panel.classList.toggle('active', Number(panel.dataset.step) === current));
+        buttons.forEach(button => button.classList.toggle('active', Number(button.dataset.stepTarget) === current));
+        previous.hidden = current === 1;
+        next.hidden = current === panels.length;
+        submit.hidden = current !== panels.length;
+        panels[current - 1].scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
+    function validateVisibleStep() {
+        const fields = [...panels[current - 1].querySelectorAll('input, select, textarea')];
+        for (const field of fields) {
+            if (!field.checkValidity()) {
+                field.reportValidity();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    next.addEventListener('click', () => {
+        if (validateVisibleStep()) showStep(current + 1);
+    });
+    previous.addEventListener('click', () => showStep(current - 1));
+    buttons.forEach(button => button.addEventListener('click', () => {
+        const target = Number(button.dataset.stepTarget);
+        if (target < current || validateVisibleStep()) showStep(target);
+    }));
+
+    const firstError = form.querySelector('.errorlist');
+    if (firstError) {
+        const panel = firstError.closest('.form-step');
+        if (panel) showStep(Number(panel.dataset.step));
+    }
+})();
+</script>
+{% endblock %}

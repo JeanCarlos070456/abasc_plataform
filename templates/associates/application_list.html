@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Solicitações de associação — ABASC{% endblock %}
+{% block content %}
+<div class="dashboard-layout container-wide">
+    {% include 'includes/dashboard_nav.html' %}
+    <section class="dashboard-content">
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">Gestão de associados</span>
+                <h1>Solicitações de associação</h1>
+                <p>{{ pending_count }} solicitação(ões) aguardando análise.</p>
+            </div>
+            <a class="btn btn-ghost" href="{% url 'associates:manage_members' %}">Gerenciar membros</a>
+        </div>
+        <div class="panel-card">
+            <form class="filter-bar" method="get">
+                <select class="form-control" name="status">
+                    <option value="">Todas</option>
+                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pendentes</option>
+                    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Aprovadas</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Filtrar</button>
+            </form>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Nome</th><th>Tipo</th><th>Categoria</th><th>UF</th><th>Data</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                    {% for application in applications %}
+                        <tr>
+                            <td><strong>{{ application.full_name }}</strong><br><small>{{ application.email }}</small></td>
+                            <td>{{ application.get_application_type_display }}</td>
+                            <td>{{ application.get_category_display }}</td>
+                            <td>{{ application.state }}</td>
+                            <td>{{ application.requested_at|date:'d/m/Y H:i' }}</td>
+                            <td><span class="badge badge-{{ application.status }}">{{ application.get_status_display }}</span></td>
+                            <td><a href="{% url 'associates:application_detail' application.pk %}">Analisar</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7">Nenhuma solicitação encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
