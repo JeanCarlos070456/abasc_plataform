@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -11,14 +13,28 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.core.models import AuditLog
 from apps.core.services import log_action
 from apps.core.storage import delete_avatar, upload_avatar
+from apps.associates.services import (
+    MembershipProcessingError,
+    resend_member_access,
+)
 
-from .forms import AvatarForm, LoginForm, ProfileForm
+from .forms import (
+    AvatarForm,
+    FirstAccessForm,
+    LoginForm,
+    OnboardingAvatarForm,
+    OnboardingForm,
+    ProfileForm,
+)
 from .models import User
 from .services import (
     SupabaseAuthError,
     SupabaseAuthService,
     sync_supabase_user,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -46,6 +62,60 @@ def create_password(request):
                 ),
             },
         },
+    )
+
+
+@require_http_methods(["GET", "POST"])
+def first_access(request):
+    """
+    Porta de entrada dos associados migrados da base histórica.
+
+    O formulário confirma e-mail + CPF no cadastro Django. A autenticação
+    continua sendo feita pelo Supabase. A resposta é genérica para não
+    revelar se um cadastro existe ou não.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:post_login")
+
+    form = FirstAccessForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        email = form.cleaned_data["email"]
+        cpf = form.cleaned_data["cpf"]
+
+        user = User.objects.filter(
+            email__iexact=email,
+            cpf=cpf,
+            legacy_imported=True,
+            is_active=True,
+        ).first()
+
+        if user is not None:
+            try:
+                resend_member_access(user)
+            except MembershipProcessingError:
+                logger.exception(
+                    "Falha ao processar primeiro acesso do usuário %s.",
+                    user.pk,
+                )
+            except Exception:
+                logger.exception(
+                    "Erro inesperado no primeiro acesso do usuário %s.",
+                    user.pk,
+                )
+
+        messages.success(
+            request,
+            "Se os dados informados corresponderem a um cadastro habilitado, "
+            "você receberá no e-mail um link seguro para criar ou redefinir "
+            "sua senha.",
+        )
+        return redirect("accounts:first_access")
+
+    return render(
+        request,
+        "accounts/first_access.html",
+        {"form": form},
     )
 
 def _local_sign_in(email, password):
@@ -121,6 +191,9 @@ def login_view(request):
                 f'Bem-vindo(a), {user.display_name}.',
             )
 
+            if user.needs_onboarding:
+                return redirect('accounts:onboarding')
+
             next_url = (
                 request.POST.get('next')
                 or request.GET.get('next')
@@ -143,6 +216,8 @@ def login_view(request):
 
 @login_required
 def post_login(request):
+    if request.user.needs_onboarding:
+        return redirect('accounts:onboarding')
     if request.user.is_president:
         return redirect('dashboards:president')
     if request.user.can_manage_content:
@@ -169,9 +244,117 @@ def logout_view(request):
     return redirect('core:home')
 
 
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def onboarding(request):
+    """
+    Etapa obrigatória após a criação da senha no primeiro acesso.
+    O associado revisa seus dados e adiciona a foto de perfil.
+    """
+    if not request.user.needs_onboarding:
+        return redirect("accounts:post_login")
+
+    profile_form = OnboardingForm(
+        request.POST or None,
+        instance=request.user,
+        prefix="profile",
+    )
+    avatar_form = OnboardingAvatarForm(
+        request.POST or None,
+        request.FILES or None,
+        user=request.user,
+        prefix="avatar",
+    )
+
+    if (
+        request.method == "POST"
+        and profile_form.is_valid()
+        and avatar_form.is_valid()
+    ):
+        new_avatar = avatar_form.cleaned_data.get("avatar")
+        old_path = request.user.avatar_path
+        new_path = ""
+
+        try:
+            if new_avatar:
+                new_path = upload_avatar(
+                    new_avatar,
+                    user_id=request.user.pk,
+                )
+
+            with transaction.atomic():
+                user = profile_form.save(commit=False)
+
+                if new_path:
+                    user.avatar_path = new_path
+                    user.avatar_url = ""
+
+                user.onboarding_completed = True
+                user.migration_status = User.MigrationStatus.READY
+                user.save()
+
+                log_action(
+                    request,
+                    AuditLog.Action.UPDATE,
+                    "Primeiro acesso concluído e dados cadastrais validados",
+                    "User",
+                    user.pk,
+                )
+
+                if old_path and new_path and old_path != new_path:
+                    transaction.on_commit(
+                        lambda path=old_path: delete_avatar(path)
+                    )
+
+        except ValidationError as exc:
+            if new_path:
+                delete_avatar(new_path)
+            avatar_form.add_error(
+                "avatar",
+                _validation_message(exc),
+            )
+        except ImproperlyConfigured:
+            if new_path:
+                delete_avatar(new_path)
+            avatar_form.add_error(
+                None,
+                "O armazenamento de avatares não está configurado.",
+            )
+        except Exception:
+            if new_path:
+                delete_avatar(new_path)
+            logger.exception(
+                "Falha ao concluir onboarding do usuário %s.",
+                request.user.pk,
+            )
+            profile_form.add_error(
+                None,
+                "Não foi possível concluir seu primeiro acesso. "
+                "Tente novamente.",
+            )
+        else:
+            messages.success(
+                request,
+                "Cadastro atualizado. Seu primeiro acesso foi concluído.",
+            )
+            return redirect("accounts:post_login")
+
+    return render(
+        request,
+        "accounts/onboarding.html",
+        {
+            "form": profile_form,
+            "avatar_form": avatar_form,
+        },
+    )
+
 @login_required
 @require_http_methods(['GET', 'POST'])
 def profile(request):
+    if request.user.needs_onboarding:
+        return redirect("accounts:onboarding")
+
     profile_form = ProfileForm(
         instance=request.user,
         prefix='profile',

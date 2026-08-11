@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Concluir cadastro — ABASC{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-copy" style="max-width: 780px; margin-bottom: 1.5rem;">
+            <span class="eyebrow">Primeiro acesso</span>
+            <h1>Revise seus dados</h1>
+            <p>
+                Seu cadastro foi migrado da base histórica da ABASC.
+                Confira as informações abaixo, complete o que estiver faltando
+                e adicione sua foto de perfil para liberar o acesso à plataforma.
+            </p>
+        </div>
+
+        <div class="auth-card" style="max-width: 980px; margin: 0 auto;">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% if avatar_form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ avatar_form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input
+                        class="form-control"
+                        value="{{ request.user.email }}"
+                        disabled
+                    >
+                    <small>
+                        O e-mail é controlado pelo serviço de autenticação.
+                    </small>
+                </div>
+
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                {% if field.field.required %}*{% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <hr style="margin: 1.5rem 0;">
+
+                <div class="form-group">
+                    <label for="{{ avatar_form.avatar.id_for_label }}">
+                        {{ avatar_form.avatar.label }} *
+                    </label>
+                    {{ avatar_form.avatar }}
+
+                    {% if avatar_form.avatar.help_text %}
+                        <small>{{ avatar_form.avatar.help_text }}</small>
+                    {% endif %}
+
+                    {{ avatar_form.avatar.errors }}
+
+                    {% if request.user.display_avatar_url %}
+                        <div style="margin-top: .75rem;">
+                            <img
+                                src="{{ request.user.display_avatar_url }}"
+                                alt="Foto de perfil atual"
+                                style="
+                                    width: 96px;
+                                    height: 96px;
+                                    object-fit: cover;
+                                    border-radius: 50%;
+                                "
+                            >
+                            <small style="display: block; margin-top: .35rem;">
+                                Foto atualmente cadastrada.
+                            </small>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">
+                        Salvar e concluir primeiro acesso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

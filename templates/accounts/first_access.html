@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Primeiro acesso — ABASC{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container auth-grid">
+        <div class="auth-copy">
+            <span class="eyebrow">Cadastro histórico</span>
+            <h1>Primeiro acesso</h1>
+            <p>
+                Se você já fazia parte da ABASC antes da implantação desta
+                plataforma, use seus dados cadastrados para iniciar seu acesso.
+            </p>
+
+            <ul class="check-list">
+                <li>Confirmação por e-mail e CPF</li>
+                <li>Criação de senha</li>
+                <li>Revisão cadastral antes de liberar o painel</li>
+            </ul>
+        </div>
+
+        <div class="auth-card">
+            <h2>Localizar meu cadastro</h2>
+            <p>
+                Informe o mesmo e-mail e CPF registrados
+                da ABASC.
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">
+                        {{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.cpf.id_for_label }}">
+                        {{ form.cpf.label }}
+                    </label>
+                    {{ form.cpf }}
+                    {{ form.cpf.errors }}
+
+                    {% if form.cpf.help_text %}
+                        <small>{{ form.cpf.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <button class="btn btn-primary btn-block" type="submit">
+                    Enviar link seguro
+                </button>
+            </form>
+
+            <div class="auth-note" style="margin-top: 1rem;">
+                <p>
+                    Por segurança, a plataforma não informa se um determinado
+                    e-mail ou CPF existe na base.
+                </p>
+                <a href="{% url 'accounts:login' %}">
+                    Já tenho senha e quero entrar
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
